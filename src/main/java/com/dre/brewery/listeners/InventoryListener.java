@@ -59,6 +59,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -249,11 +250,37 @@ public class InventoryListener implements Listener {
         Stream<ItemStack> itemsToCheck = relatedItems
             .filter(Objects::nonNull)
             .filter(item -> !item.getType().isAir());
-        if (itemsToCheck.anyMatch(item -> !(item.getItemMeta() instanceof PotionMeta potionMeta && Brew.get(potionMeta) != null))) {
+        if (itemsToCheck.anyMatch(item -> !isBrewItem(item))) {
             event.setResult(Event.Result.DENY);
         }
     }
 
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onInventoryDrag(InventoryDragEvent event) {
+        InventoryView view = event.getView();
+        Inventory topInventory = view.getTopInventory();
+        InventoryHolder holder = PaperLib.getHolder(topInventory, true).getHolder();
+        if (!(holder instanceof Barrel) && !(VERSION.isOrLater(MinecraftVersion.V1_14) && holder instanceof org.bukkit.block.Barrel)) {
+            return;
+        }
+
+        int topSize = topInventory.getSize();
+        for (Map.Entry<Integer, ItemStack> entry : event.getNewItems().entrySet()) {
+            int rawSlot = entry.getKey();
+            if (rawSlot < topSize) {
+                ItemStack item = entry.getValue();
+                if (item == null || item.getType().isAir()) {
+                    continue;
+                }
+                if (!isBrewItem(item)) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+        }
+    }
+
+    
     // Check if the player tries to add more than the allowed amount of brews into an mc-barrel
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInventoryClickMCBarrel(InventoryClickEvent event) {
