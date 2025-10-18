@@ -391,6 +391,9 @@ public class Barrel extends BarrelBody implements InventoryHolder {
         if (barrel == null) {
             barrel = new Barrel(spigot, signoffset);
             if (barrel.getBrokenBlock(true) == null) {
+                if (overlapsExistingBarrel(barrel)) {
+                    return false;
+                }
                 if (BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, spigot.getType())) {
                     if (!player.hasPermission("brewery.createbarrel.small")) {
                         lang.sendEntry(player, "Perms_NoBarrelCreate");
@@ -415,6 +418,33 @@ public class Barrel extends BarrelBody implements InventoryHolder {
                 return true;
             }
         }
+        return false;
+    }
+
+    private static boolean overlapsExistingBarrel(Barrel candidate) {
+        BoundingBox candidateBounds = candidate.getBounds();
+        if (candidateBounds == null) {
+            return false;
+        }
+
+        List<Barrel> worldBarrels = barrels.get(candidate.getSpigot().getWorld().getUID());
+        if (worldBarrels == null) {
+            return false;
+        }
+
+        for (Barrel existing : worldBarrels) {
+            if (existing == null) {
+                continue;
+            }
+            if (existing.getSpigot().equals(candidate.getSpigot())) {
+                return true;
+            }
+            BoundingBox existingBounds = existing.getBounds();
+            if (existingBounds != null && existingBounds.intersects(candidateBounds)) {
+                return true;
+            }
+        }
+
         return false;
     }
 
