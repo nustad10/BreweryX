@@ -79,6 +79,18 @@ public class InventoryListener implements Listener {
     /* === Recreating manually the prior BrewEvent behavior. === */
     private HashSet<UUID> trackedBrewmen = new HashSet<>();
 
+
+    // Helper: checks if an item is a valid Brewery brew
+    private boolean isBrewItem(ItemStack item) {
+        if (item == null || item.getType().isAir()) {
+            return false;
+        }
+        if (item.getItemMeta() instanceof PotionMeta potionMeta) {
+            return Brew.get(potionMeta) != null;
+        }
+        return false;
+    }
+
     /**
      * Start tracking distillation for a person when they open the brewer window.
      */
@@ -252,6 +264,7 @@ public class InventoryListener implements Listener {
             .filter(item -> !item.getType().isAir());
         if (itemsToCheck.anyMatch(item -> !isBrewItem(item))) {
             event.setResult(Event.Result.DENY);
+            event.setCancelled(true);
         }
     }
 
@@ -261,6 +274,9 @@ public class InventoryListener implements Listener {
         Inventory topInventory = view.getTopInventory();
         InventoryHolder holder = PaperLib.getHolder(topInventory, true).getHolder();
         if (!(holder instanceof Barrel) && !(VERSION.isOrLater(MinecraftVersion.V1_14) && holder instanceof org.bukkit.block.Barrel)) {
+            return;
+        }
+        if (!config.isOnlyAllowBrewsInBarrels()) {
             return;
         }
 
@@ -280,7 +296,7 @@ public class InventoryListener implements Listener {
         }
     }
 
-    
+
     // Check if the player tries to add more than the allowed amount of brews into an mc-barrel
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInventoryClickMCBarrel(InventoryClickEvent event) {
