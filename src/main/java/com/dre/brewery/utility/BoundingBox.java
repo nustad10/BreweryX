@@ -64,7 +64,17 @@ public class BoundingBox {
     public boolean contains(Block block) {
         return contains(block.getX(), block.getY(), block.getZ());
     }
+    
+    public boolean intersects(BoundingBox other) {
+        if (other == null) {
+            return false;
+        }
 
+        return max.x >= other.min.x && min.x <= other.max.x
+            && max.y >= other.min.y && min.y <= other.max.y
+            && max.z >= other.min.z && min.z <= other.max.z;
+    }
+    
     public long volume() {
         return ((long) (max.z - min.z + 1)) * ((long) (max.y - min.y + 1)) * ((long) (max.z - min.z + 1));
     }
