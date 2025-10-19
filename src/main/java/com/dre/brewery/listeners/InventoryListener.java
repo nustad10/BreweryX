@@ -201,7 +201,7 @@ public class InventoryListener implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         InventoryHolder holder = PaperLib.getHolder(event.getInventory(), true).getHolder();
         boolean isVanillaBarrel = VERSION.isOrLater(MinecraftVersion.V1_14) && holder instanceof org.bukkit.block.Barrel;
-        if (isVanillaBarrel && config.isAllowItemsInVanillaBarrels()) {
+        if (isVanillaBarrel && config.isExemptVanillaBarrels()) {
             return;
         }
         if (!(holder instanceof Barrel) && !isVanillaBarrel) {
@@ -278,7 +278,7 @@ public class InventoryListener implements Listener {
         Inventory topInventory = view.getTopInventory();
         InventoryHolder holder = PaperLib.getHolder(topInventory, true).getHolder();
         boolean isVanillaBarrel = VERSION.isOrLater(MinecraftVersion.V1_14) && holder instanceof org.bukkit.block.Barrel;
-        if (isVanillaBarrel && config.isAllowItemsInVanillaBarrels()) {
+        if (isVanillaBarrel && config.isExemptVanillaBarrels()) {
             return;
         }
         if (!(holder instanceof Barrel) && !isVanillaBarrel) {
