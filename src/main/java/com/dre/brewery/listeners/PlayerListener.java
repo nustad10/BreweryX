@@ -116,7 +116,7 @@ public class PlayerListener implements Listener {
         }
 
         Material heldItem = event.getItem() != null ? event.getItem().getType() : null;
-        if (player.isSneaking() && !BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, heldItem)) {
+        if (player.isSneaking() && type != Material.BARREL && !BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, heldItem)) {
             return;
         }
 
