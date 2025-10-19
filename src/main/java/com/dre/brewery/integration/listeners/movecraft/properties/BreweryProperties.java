@@ -65,10 +65,10 @@ public class BreweryProperties {
 
         CraftType.registerProperty(new ObjectPropertyImpl("maxBarrels", MAX_BARRELS, (data, type, fileKey, namespacedKey) -> {
             Map<String, Object> map = data.getData(fileKey).getBackingData();
-            if (map.isEmpty())
-                throw new TypeData.InvalidValueException("Value for " + fileKey + " must not be an empty map");
-
             Set<MaxBarrelEntry> maxBarrels = new HashSet<>();
+            if (map.isEmpty())
+                return maxBarrels;
+
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 if (entry.getKey() == null)
                     throw new TypeData.InvalidValueException("Keys for " + fileKey + " must be a string barrel type.");
@@ -85,27 +85,24 @@ public class BreweryProperties {
             return maxBarrels;
         }, (type -> new HashSet<>())));
 
-        final Set<Material> signs = Tag.WALL_SIGNS.getValues();
         CraftType.registerTypeTransform((MaterialSetTransform) (data, type) -> {
             EnumSet<Material> set = data.get(CraftType.ALLOWED_BLOCKS);
             if (type.getBoolProperty(ALL_BARRELS_ALLOWED)) {
                 Arrays.stream(BarrelWoodType.values())
                     .map(BarrelAsset::getMaterialsOf)
                     .forEach(set::addAll);
+            } else {
+                Set<MaxBarrelEntry> maxBarrels = (Set<MaxBarrelEntry>) type.getObjectProperty(MAX_BARRELS);
+                if (maxBarrels == null) {
+                    return data;
+                }
+
+                for (var entry : maxBarrels) {
+                    Set<Material> materialSet = BarrelAsset.getMaterialsOf(entry.type());
+                    set.addAll(materialSet);
+                }
             }
 
-            set.addAll(signs);
-            return data;
-        });
-
-        CraftType.registerTypeTransform((MaterialSetTransform) (data, type) -> {
-            EnumSet<Material> set = data.get(CraftType.ALLOWED_BLOCKS);
-            MovecraftUtil.getBarrelsProperty(type).stream()
-                .map(MaxBarrelEntry::type)
-                .map(BarrelAsset::getMaterialsOf)
-                .forEach(set::addAll);
-
-            set.addAll(signs);
             return data;
         });
     }
