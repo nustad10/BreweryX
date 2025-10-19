@@ -206,6 +206,9 @@ public class Config extends AbstractOkaeriConfigFile {
     @LocalizedComment("config.onlyAllowBrewsInBarrels")
     private boolean onlyAllowBrewsInBarrels = false;
 
+    @LocalizedComment("config.allowItemsInVanillaBarrels")
+    private boolean allowItemsInVanillaBarrels = true;
+
     @LocalizedComment("config.colorInBarrels-Brewer")
     private boolean colorInBarrels = true;
     private boolean colorInBrewer = true;
